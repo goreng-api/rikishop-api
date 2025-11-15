@@ -1,1 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="icon" href="/icon.png" type="image/png">
+    <title id="page">Rikishopreal API</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&display=swap" rel="stylesheet">
 
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="loader-wrapper">
+        <div class="relative" style="display: flex; align-items: center; justify-content: center;">
+            <div class="loader"></div>
+            <img src="/icon.png" alt="Logo" class="loader-logo">
+        </div>
+        <p>Memuat Dokumentasi...</p>
+    </div>
+
+    <div id="docs-page">
+        <img src="/icon.png" alt="Logo" class="docs-logo">
+        <main class="docs-main">
+            <div id="datetime-widget">
+                <div id="day"></div>
+                <div id="date"></div>
+                <div id="time"></div>
+            </div>
+            <h1>Rikishopreal <span class="text-gradient">API</span></h1>
+            <p class="docs-subheadline">
+                Platform API terlengkap yang dirancang untuk kecepatan, keandalan, dan kemudahan integrasi. Buka potensi penuh proyek Anda dengan data real-time kami.
+            </p>
+            <button id="docs-page-button" class="play-button">
+                <i class="fa-solid fa-book-open"></i>
+                Lihat Dokumentasi
+            </button>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-bolt-lightning"></i>
+                        <h2>Kecepatan Respon</h2>
+                    </div>
+                    <p>
+                        Infrastruktur server kami dioptimalkan untuk memberikan response time minimal, memastikan aplikasi Anda berjalan lancar tanpa hambatan.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-star"></i>
+                        <h2>Keunggulan Data</h2>
+                    </div>
+                    <p>
+                        Dapatkan akses ke data akurat dan ter-update dari berbagai sumber, mulai dari media sosial, game, hingga alat AI canggih.
+                    </p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <h2>Stabilitas Server</h2>
+                    </div>
+                    <p>
+                        Dibangun di atas arsitektur yang kuat, API kami menjamin uptime 99.9% dengan sistem rate-limiting cerdas untuk mencegah penyalahgunaan.
+                    </p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="main-api-page" style="display: none;">
+        
+        <div id="sidebarOverlay" class="sidebar-overlay"></div>
+        <div id="sidebarMenu" class="sidebar-menu">
+            <div class="sidebar-header">
+                <span>Rikishopreal Menu</span>
+                <button id="closeSidebarBtn" class="btn-close">&times;</button>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="https://api.rikishop.my.id"><i class="fa-solid fa-home"></i> Beranda</a></li>
+                    <li><a href="https://bio.rikishopreal.my.id" target="_blank"><i class="fa-solid fa-headset"></i> Hubungi Kami</a></li>
+                    <li class="nav-section-title">FITUR & ALAT</li>
+                    <li><a href="https://toko.rikishop.my.id/tourl.html" target="_blank"><i class="fa-solid fa-link"></i> Ubah Foto Jadi Link</a></li>
+                    <li><a href="https://toko.rikishop.my.id/remini.html" target="_blank"><i class="fa-solid fa-image"></i> HD-kan Foto</a></li>
+                    <li><a href="https://toko.rikishop.my.id/tiktok.html" target="_blank"><i class="fab fa-tiktok"></i> TikTok Downloader</a></li>
+                    <li><a href="https://toko.rikishop.my.id/instagram.html" target="_blank"><i class="fab fa-instagram"></i> Instagram Downloader</a></li>
+                    <li><a href="https://toko.rikishop.my.id/youtube.html" target="_blank"><i class="fab fa-youtube"></i> YouTube Downloader</a></li>
+                </ul>
+            </nav>
+        </div>
+        
+        <div id="preloader" class="hidden"> 
+            <div class="loader-content">
+                <img src="/icon.png" alt="Loading..." class="pulsing-logo">
+                <p>Loading API...</p>
+            </div>
+        </div>
+
+        <div id="notification" class=""></div>
+
+        <header class="top-navbar">
+            <div class="navbar-logo"> <img src="/icon.png" alt="Logo"> </div>
+            <div class="navbar-scrolling-text-wrapper">
+                <div class="scrolling-text-container"> <span class="scrolling-text">Selamat Datang di Rikishopreal Api! Semoga harimu menyenangkan!</span> </div>
+            </div>
+            <div class="navbar-theme-switcher"> <button id="theme-toggle-btn" class="theme-toggle-button" aria-label="Toggle theme"></button> </div>
+        </header>
+
+        <div class="container">
+            <section class="hero fade-in">
+                <div class="api-platform-badge" id="apiPlatformBadge"> <i class="fa-solid fa-rocket"></i> REST API Platform </div>
+                <div class="hero-header"> <h2 id="apiTitle"></h2> </div>
+                <p>Unlock the power of seamless integration with our comprehensive API suite. Access powerful endpoints with just a few clicks.</p>
+            </section>
+
+            <section class="products-section fade-in" style="animation-delay: 0.2s;">
+                <h2>Jelajahi Produk Kami</h2>
+                <p>Butuh script, layanan digital, atau produk premium lainnya? Kunjungi toko kami untuk melihat semua penawaran terbaik. Dapatkan solusi yang Anda butuhkan hari ini!</p>
+                <div class="product-buttons">
+                    <button id="aboutApiBtn" class="play-button btn-secondary"> <i class="fa-solid fa-info-circle"></i> Tentang API </button>
+                    <a href="https://toko.rikishop.my.id" target="_blank" rel="noopener noreferrer" class="play-button"> <i class="fa-solid fa-store"></i> Kunjungi Toko </a>
+                    <button id="reportErrorBtn" class="play-button btn-secondary"> <i class="fa-solid fa-bug"></i> Lapor Error </button>
+                    <button id="requestFeatureBtn" class="play-button btn-secondary"> <i class="fa-solid fa-wand-magic-sparkles"></i> Request Fitur </button>
+                </div>
+            </section>
+
+            <section class="content" id="apiContentSection">
+                <div class="search-container"> <input type="search" id="apiSearchInput" placeholder="🔍 Cari endpoint..."> </div>
+                <div class="tabs" id="tabs"></div>
+                <div id="api-list" class="api-list">
+                    </div>
+                <p id="noResultsMessage" style="display: none; text-align: center; color: var(--gray); margin-top: 1.5rem; grid-column: 1 / -1;">Endpoint tidak ditemukan.</p>
+            </section>
+        </div>
+
+        <div class="modal" id="apiResponseModal"> 
+            <div class="modal-dialog"> 
+                <div class="modal-header"> 
+                    <div> <h5 id="modalApiName">Nama API</h5> <span id="modalApiDesc">Deskripsi API</span> </div> 
+                    <button class="btn-close">×</button> 
+                </div> 
+                <div class="modal-body"> 
+                    <div class="copy-section"> <span id="copyEndpointText"></span> <button class="copy-button"><i class="far fa-copy"></i> Copy URL</button> </div> 
+                    <form id="paramForm" style="margin-bottom: 0.5rem"></form> 
+                    <button id="submitParamBtn" type="button" style="display: none;"></button> 
+                    <button id="retryRequestBtn" class="play-button btn-secondary d-none" style="margin-top: 0.5rem; width: 100%;"> <i class="fa-solid fa-rotate-right"></i> Coba Ulang </button> 
+                    <div id="apiResponseLoading" class="loading-spinner" style="display: none;"></div> 
+                    <button id="copyResponseBtn" class="copy-button d-none" style="margin-bottom: 0.75rem;"><i class="far fa-copy"></i> Copy Response</button> 
+                    <pre id="apiResponseContent" class="d-none"></pre> 
+                </div> 
+            </div> 
+        </div>
+        
+        <div class="modal" id="reportModal"> 
+            <div class="modal-dialog"> 
+                <div class="modal-header"> 
+                    <div> <h5 id="reportModalTitle">Judul Modal Laporan</h5> <span>Kirimkan masukan Anda ke developer</span> </div> 
+                    <button class="btn-close">×</button> 
+                </div> 
+                <div class="modal-body"> 
+                    <form id="reportForm"> 
+    <input type="hidden" id="reportType" name="reportType" value=""> 
+    
+    <label for="reportName">Nama Anda</label> 
+    <input type="text" id="reportName" name="nama" placeholder="Masukkan nama Anda (opsional)..."> 
+    
+    <label for="reportText">Isi Teks Laporan/Request</label> 
+    <textarea id="reportText" name="teks" placeholder="Jelaskan error atau fitur yang Anda inginkan..." required></textarea> 
+
+    <label for="reportImage">Lampirkan Gambar (Opsional, Max 5MB)</label>
+    <input type="file" id="reportImage" name="reportImage" accept="image/png, image/jpeg, image/gif" 
+           style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--light); margin-bottom: 1rem; font-size: 0.9rem; font-family: inherit; transition: var(--transition);">
+    <button id="submitReportBtn" type="submit"> 
+        <i class="fa-solid fa-paper-plane"></i> Kirim 
+    </button> 
+            </form> 
+                </div> 
+            </div> 
+        </div>
+        
+        <div class="modal" id="donationModal"> 
+            <div class="modal-dialog" style="max-width: 360px; text-align: center;"> 
+                <div class="modal-header" style="border-bottom: none; padding-bottom: 0.5rem; margin-bottom: 0;"> 
+                    <h5 style="width: 100%; text-align: center; margin-bottom: 0;">Support Us</h5> 
+                    <button class="btn-close" style="position: absolute; top: 8px; right: 8px;"></button> 
+                </div> 
+                <div class="modal-body" style="padding-top: 0;"> 
+                    <p style="color: var(--gray); margin-bottom: 1rem; font-size: 0.9rem;">Merasa API ini bermanfaat? Anda bisa mendukung pengembangan lebih lanjut.</p> 
+                    <img src="/images/donasi-qr.png" alt="Donation QR Code" id="donationQR">
+                    <div class="donation-buttons-container" style="margin-top: 0.8rem;">
+                        <button id="continueBtn" class="play-button"> Lanjut ke Website </button>
+                        <a href="https://whatsapp.com/channel/0029Vay3uoZ8F2p6btxzND3A" target="_blank" rel="noopener noreferrer" class="play-button btn-secondary">
+                            <i class="fab fa-whatsapp"></i> Masuk ke Saluran
+                        </a>
+                    </div>
+                </div> 
+            </div> 
+        </div>
+
+        <div class="modal" id="aboutApiModal"> 
+            <div class="modal-dialog"> 
+                <div class="modal-header"> 
+                    <div> <h5 id="aboutApiModalTitle">Tentang API Ini</h5> <span id="aboutApiCreator"></span> </div> 
+                    <button class="btn-close">×</button> 
+                </div> 
+                <div class="modal-body" style="font-size: 0.9rem; line-height: 1.6; color: var(--gray);"> 
+                    <p style="margin-bottom: 0.8rem;">Selamat datang di <strong id="aboutApiName" style="color: var(--light);">Nama API</strong>!</p> 
+                    <p style="margin-bottom: 0.8rem;">Ini adalah layanan RESTful API yang menyediakan berbagai endpoint bermanfaat untuk kebutuhan digital Anda.</p> 
+                    <p style="margin-bottom: 0.8rem;"> <strong>Tujuan Utama:</strong><br> Memberikan akses yang mudah, cepat, dan stabil ke berbagai layanan digital melalui API.</p> 
+                    <p> Silakan gunakan tombol <i class="fa-solid fa-play"></i> <strong>Try it now</strong> pada setiap endpoint untuk melakukan uji coba langsung. Gunakan juga tombol "Lapor Error" atau "Request Fitur" di halaman utama untuk memberikan masukan kepada kami.</p> <br> 
+                    <p>Terima kasih telah menggunakan layanan ini!</p> 
+                </div> 
+            </div> 
+        </div>
+        
+        <div id="qrLightbox" class="qr-lightbox-overlay"> <img src="" alt="Zoomed QR Code" id="lightboxImage"> </div>
+
+        <audio id="backgroundMusic" loop preload="metadata"> <source src="/audio/music.mp3" type="audio/mpeg"> Your browser does not support the audio element. </audio>
+        <div id="musicFabContainer"> 
+            <div id="musicControlsExpanded">
+                <button id="playPauseBtn" title="Play/Pause"><i class="fas fa-play"></i></button>
+                <button id="muteBtn" title="Mute/Unmute"><i class="fas fa-volume-up"></i></button>
+                <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1" title="Volume">
+            </div>
+            <button id="fabToggleBtn" title="Music Controls"><i class="fas fa-music"></i></button> 
+        </div>
+
+        <footer class="footer">
+            <div id="credits">© Tahun Sekarang By Nama Kreator</div>
+            <div class="contact">
+                <a id="githubLink" href="#" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
+                <a id="whatsappLink" href="#" target="_blank" title="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                <a id="youtubeLink" href="#" target="_blank" title="YouTube"><i class="fab fa-youtube"></i></a>
+            </div>
+        </footer>
+
+    </div> 
+    
+    <script src="script.js" defer></script>
+</body>
+</html>
