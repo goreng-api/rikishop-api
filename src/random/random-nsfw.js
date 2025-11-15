@@ -1,14 +1,16 @@
 module.exports = function(app) {
     async function anim() {
         try {
-            const data = await fetchJson(`https://api.waifu.pics/sfw/waifu`)
+            let type = ["blowjob", "neko", "trap", "waifu"]
+            let rn = type[Math.floor(Math.random() * type.length)]
+            const data = await fetchJson(`https://api.waifu.pics/nsfw/${rn}`)
             const response = await getBuffer(data.url)
             return response
         } catch (error) {
             throw error;
         }
     }
-    app.get('/random/waifu', async (req, res) => {
+    app.get('/random/nsfw', async (req, res) => {
         try {
             const { apikey } = req.query;
             if (!global.apikey.includes(apikey)) return res.json({ status: false, error: 'Apikey invalid' })
