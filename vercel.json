@@ -1,0 +1,50 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/*.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/remini",
+      "dest": "/api/remini.js"
+    },
+    {
+      "src": "/api/tourl",
+      "dest": "/api/tourl.js"
+    },
+    {
+      "src": "/api/tiktok",
+      "dest": "/api/tiktok.js"
+    },
+    {
+      "src": "/api/instagram",
+      "dest": "/api/instagram.js"
+    },
+    {
+      "src": "/api/youtube",
+      "dest": "/api/youtube.js"
+    },
+    {
+      "src": "/api/imageProxy",
+      "dest": "/api/imageProxy.js"
+    },
+    {
+      "src": "/api/downloadProxy",
+      "dest": "/api/downloadProxy.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.js"
+    }
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
+}
