@@ -332,6 +332,12 @@
       "desc": "Downloader video/foto Twitter (via densave)",
       "status": "Active",
       "path": "/download/twitter-dl?url=https://x.com/L_MarshaJKT48/status/1778384656574075039?s=20"
+    }, 
+    {
+      "name": "Terabox Downloader",
+      "desc": "Downloader video/file dari Terabox",
+      "status": "Active",
+      "path": "/download/terabox?url=https://terabox.com/s/1ZdiYMWn2JsklSZxGdKJEBw"
     }
   ],
   "random": [
