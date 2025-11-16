@@ -530,6 +530,18 @@
       "desc": "Baca isi email akunlama.com (perlu region & key)",
       "status": "Active",
       "path": "/tools/akunlama/read?region=...&key=..."
+    },
+     {
+      "name": "Translate Jawa",
+      "desc": "Translate Indo/Jawa. [select:from|indo,jawa] [select:to|indo,ngoko,krama-lugu,krama-alus]",
+      "status": "Active",
+      "path": "/tools/translate-jawa?text=kamu lagi apa&from=indo&to=krama-alus"
+    },
+    {
+      "name": "Aksara Jawa",
+      "desc": "Ubah Latin ke Aksara Jawa (atau sebaliknya). [select:direction|toJavanese,toLatin]",
+      "status": "Active",
+      "path": "/tools/aksara-jawa?text=sragen&direction=toJavanese"
     }
   ],
   "stalker": [
@@ -569,18 +581,6 @@
       "status": "Active",
       "path": "/stalk/youtube?url=https://www.youtube.com/@... "
     },
-    {
-      "name": "Translate Jawa",
-      "desc": "Translate Indo/Jawa. [select:from|indo,jawa] [select:to|indo,ngoko,krama-lugu,krama-alus]",
-      "status": "Active",
-      "path": "/tools/translate-jawa?text=kamu lagi apa&from=indo&to=krama-alus"
-    },
-    {
-      "name": "Aksara Jawa",
-      "desc": "Ubah Latin ke Aksara Jawa (atau sebaliknya). [select:direction|toJavanese,toLatin]",
-      "status": "Active",
-      "path": "/tools/aksara-jawa?text=sragen&direction=toJavanese"
-    }
   ],
   "creator": [
     {
