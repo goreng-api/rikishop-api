@@ -261,10 +261,16 @@
       "path": "/download/capcut?url=https://www.capcut.com/tv2/ZSUsRQqyX/"
     },
     {
-      "name": "Spotify",
-      "desc": "Downloader spotify",
+      "name": "Spotify Downloader",
+      "desc": "Download lagu Spotify MP3 via Link URL.",
       "status": "Active",
-      "path": "/download/spotify?url=https://open.spotify.com/track/4iV5W9uYEdYUVa79Axb7Rh"
+      "path": "/download/spotify?url=https://open.spotify.com/track/5cqRwxHb5kys7gj78LCPLd"
+    },
+    {
+      "name": "Spotify Play (Search)",
+      "desc": "Cari dan download lagu langsung berdasarkan Judul (Query).",
+      "status": "Active",
+      "path": "/download/spotify?q=Mahalini Sial"
     },
     {
       "name": "XNXX",
