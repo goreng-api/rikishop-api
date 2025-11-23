@@ -1,7 +1,7 @@
 // --- Variabel Global ---
 let endpointStatuses = {};
 let lastFetchedUrl = "";
-let currentEndpointMethod = "GET"; // Variabel baru untuk simpan metode (GET/POST)
+let currentEndpointMethod = "GET"; 
 let settings = {};
 let isApiInitialized = false; 
 
@@ -28,13 +28,8 @@ function updateDateTime() {
     const monthName = months[now.getMonth()];
     const year = now.getFullYear();
     const time = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false }).replace(/\./g, ':');
-    
-    const dayEl = document.getElementById('day');
-    const dateEl = document.getElementById('date');
-    const timeEl = document.getElementById('time');
-    if (dayEl) dayEl.textContent = dayName;
-    if (dateEl) dateEl.textContent = `${date} ${monthName} ${year}`;
-    if (timeEl) timeEl.textContent = time;
+    const dayEl = document.getElementById('day'); const dateEl = document.getElementById('date'); const timeEl = document.getElementById('time');
+    if (dayEl) dayEl.textContent = dayName; if (dateEl) dateEl.textContent = `${date} ${monthName} ${year}`; if (timeEl) timeEl.textContent = time;
 }
 
 // --- Inisialisasi Halaman API Utama ---
@@ -48,19 +43,16 @@ async function initializeMainApiPage() {
     // 1. Terapkan Tema
     const themeToggleBtn = document.getElementById("theme-toggle-btn"); 
     const applyTheme = (theme) => { 
-        body.setAttribute("data-theme", theme); 
-        localStorage.setItem("theme", theme); 
+        body.setAttribute("data-theme", theme); localStorage.setItem("theme", theme); 
         if (themeToggleBtn) themeToggleBtn.innerHTML = theme === "dark" ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>'; 
         if (theme === "dark") { body.style.backgroundImage = 'none'; body.style.background = 'linear-gradient(135deg, var(--darker), var(--dark))'; } 
         else { body.style.backgroundImage = "url('/images/background.jpg')"; body.style.backgroundSize = "cover"; body.style.backgroundPosition = "center center"; body.style.backgroundAttachment = "fixed"; body.style.backgroundRepeat = "no-repeat"; }
     }; 
-    const savedTheme = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
-    const currentTheme = savedTheme || (prefersDark ? "dark" : "light");
-    applyTheme(currentTheme); 
+    const savedTheme = localStorage.getItem("theme"); const prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)').matches;
+    applyTheme(savedTheme || (prefersDark ? "dark" : "light")); 
     if (themeToggleBtn) { themeToggleBtn.addEventListener("click", () => applyTheme(body.getAttribute("data-theme") === "dark" ? "light" : "dark")); }
 
-    // 2. Musik & Donasi (Kode lama disingkat agar muat, logika sama)
+    // 2. Musik & Donasi
     const donationModal = document.getElementById("donationModal"); const continueBtn = document.getElementById("continueBtn"); const bgMusic = document.getElementById('backgroundMusic'); const musicFab = document.getElementById('musicFabContainer'); const fabToggle = document.getElementById('fabToggleBtn'); const musicControls = document.getElementById('musicControlsExpanded'); const playPause = document.getElementById('playPauseBtn'); const muteBtn = document.getElementById('muteBtn'); const volume = document.getElementById('volumeSlider'); let musicStarted = false; 
     const tryStartMusic = () => { if (bgMusic && !musicStarted) { bgMusic.volume = parseFloat(localStorage.getItem('musicVolume') || volume?.value || 1); if (localStorage.getItem('musicMuted') === 'true') { bgMusic.muted = true; if(muteBtn) muteBtn.innerHTML = '<i class="fas fa-volume-mute"></i>'; } else { bgMusic.muted = false; if(muteBtn) muteBtn.innerHTML = '<i class="fas fa-volume-up"></i>'; } if (volume) volume.value = bgMusic.volume; bgMusic.play().then(() => { if(musicFab) musicFab.style.display = 'block'; musicStarted = true; }).catch(e => { if(musicFab) musicFab.style.display = 'block'; musicStarted = true; console.warn("Autoplay musik gagal:", e.message); }); } }; 
     if (donationModal) { setTimeout(() => donationModal.classList.add("active"), 500); }
@@ -72,7 +64,6 @@ async function initializeMainApiPage() {
     if (bgMusic && playPause) { bgMusic.onplay = () => playPause.innerHTML = '<i class="fas fa-pause"></i>'; bgMusic.onpause = () => playPause.innerHTML = '<i class="fas fa-play"></i>'; bgMusic.onended = () => playPause.innerHTML = '<i class="fas fa-play"></i>'; }
     if (musicFab) musicFab.style.display = 'block'; 
 
-    // 3. QR Lightbox
     const qrImg = document.getElementById("donationQR"); const qrBox = document.getElementById("qrLightbox"); const lightImg = document.getElementById("lightboxImage"); if (qrImg && qrBox && lightImg) { qrImg.addEventListener("click", () => { lightImg.src = qrImg.src; qrBox.classList.add("active"); }); qrBox.addEventListener("click", (e) => { if (e.target === qrBox) qrBox.classList.remove("active"); }); }
 
     // 4. Load Settings & Render API
@@ -133,7 +124,6 @@ async function initializeMainApiPage() {
                 if (lS.includes("error") || lS.includes("danger") || lS.includes("down")) sC = "danger"; 
                 else if (lS.includes("warning") || lS.includes("beta") || lS.includes("maintenance")) sC = "warning"; 
                 
-                // [PERBAIKAN] Menambahkan data-method ke tombol button
                 const method = api.method || "GET";
 
                 card.innerHTML = `<div class="api-info"><h3><span class="api-name-text">${api.name}</span> ${labelHtml}</h3><p>${api.desc || ''}</p><span class="status ${sC}" data-path="${basePath}">${liveStatus}</span></div><button class="play-button" data-endpoint="${api.path}" data-apiname="${api.name}" data-apidesc="${api.desc||''}" data-method="${method}"><i class="fa-solid fa-play"></i> Try it now</button>`; 
@@ -154,29 +144,25 @@ async function initializeMainApiPage() {
         const endpointPath = playBtn.dataset.endpoint;
         const apiName = playBtn.dataset.apiname;
         let apiDesc = playBtn.dataset.apidesc || '';
-        const apiMethod = playBtn.dataset.method || "GET"; // Ambil method (GET/POST)
+        const apiMethod = playBtn.dataset.method || "GET"; 
         
-        // --- Parsing Konfigurasi Khusus [select:...] dan [input:file...] ---
         const selectConfigs = {}; 
-        const fileConfigs = {}; // Penampung config file
+        const fileConfigs = {}; 
         
         const selectRegex = /\[select:([^|\]]+)\|([^\]]+)\]/g;
-        const fileRegex = /\[input:file\|([^\]]+)\]/g; // Regex baru untuk file
+        const fileRegex = /\[input:file\|([^\]]+)\]/g; 
         
         let match;
-        // Parse Select
         while ((match = selectRegex.exec(apiDesc)) !== null) {
             const paramName = match[1].trim();
             const options = match[2].split(',').map(opt => opt.trim());
             selectConfigs[paramName.toLowerCase()] = options;
         }
-        // Parse File
         while ((match = fileRegex.exec(apiDesc)) !== null) {
             const paramName = match[1].trim();
             fileConfigs[paramName.toLowerCase()] = true;
         }
 
-        // Bersihkan deskripsi dari tag
         const cleanDesc = apiDesc.replace(selectRegex, '').replace(fileRegex, '').trim();
 
         const modal = document.getElementById("apiResponseModal");
@@ -196,7 +182,7 @@ async function initializeMainApiPage() {
         lastFetchedUrl = "";
         
         currentEndpointPath = endpointPath;
-        currentEndpointMethod = apiMethod; // Simpan method ke global
+        currentEndpointMethod = apiMethod;
         currentEndpointRequiresApiKey = endpointPath.includes("apikey=");
         
         modalTitle.innerText = apiName || "API Endpoint";
@@ -210,48 +196,55 @@ async function initializeMainApiPage() {
             const basePath = pathParts[0];
             let displayUrl = basePath;
             const queryParams = pathParts[1] ? pathParts[1].split('&') : [];
+            
+            // [LOGIKA FIX: GABUNGKAN PARAM URL & PARAM FILE]
+            const allParamKeys = new Set();
+            queryParams.forEach(p => { if(p) allParamKeys.add(p.split('=')[0].trim()); });
+            Object.keys(fileConfigs).forEach(k => allParamKeys.add(k));
+            
             let hasQueryParams = false;
             let hasApiKeyParamInPath = false;
 
-            // [LOGIKA FORM GENERATOR]
-            if (queryParams.length > 0 || Object.keys(fileConfigs).length > 0) {
+            if (allParamKeys.size > 0 || currentEndpointRequiresApiKey) {
                 hasQueryParams = true;
                 const paramsToDisplay = [];
 
-                // Loop parameter biasa
-                queryParams.forEach(p => {
-                    const [keyRaw, defaultValue = ""] = p.split("=");
-                    if (!keyRaw) return;
+                allParamKeys.forEach(keyRaw => {
+                    // Abaikan jika key kosong
+                    if(!keyRaw) return;
                     const key = keyRaw.trim();
                     const lowerKey = key.toLowerCase();
+                    
+                    // Cari value default dari URL jika ada
+                    const urlParam = queryParams.find(p => p.startsWith(key + '='));
+                    const defaultValue = urlParam ? urlParam.split('=')[1] : "";
+                    
                     const label = key.charAt(0).toUpperCase() + key.slice(1);
                     const isApiKey = lowerKey === 'apikey';
                     if (isApiKey) hasApiKeyParamInPath = true;
                     const isRequired = !isApiKey;
 
-                    // Cek apakah ini harus jadi File Input (berdasarkan deskripsi [input:file|nama])
+                    // GENERATOR INPUT (PRIORITAS FILE -> SELECT -> TEXT)
                     if (fileConfigs[lowerKey]) {
                         form.innerHTML += `<label for="${key}">${label} (Upload File)</label><input type="file" id="${key}" name="${key}" style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--light); margin-bottom: 1rem;" ${isRequired ? 'required' : ''} />`;
                     }
-                    // Cek apakah ini Select Dropdown
                     else if (selectConfigs[lowerKey]) {
                         const options = selectConfigs[lowerKey];
                         let optionsHtml = options.map(opt => `<option value="${opt}" ${opt === defaultValue ? 'selected' : ''}>${opt.toUpperCase()}</option>`).join('');
                         form.innerHTML += `<label for="${key}">${label} (Pilih Opsi)</label><select id="${key}" name="${key}" style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--light); margin-bottom: 1rem; font-size: 0.95rem; font-family: inherit;">${optionsHtml}</select>`;
                     } 
-                    // Text Input Biasa
                     else {
                         form.innerHTML += `<label for="${key}">${label}${isRequired ? ' (Wajib)' : ''}</label><input type="text" id="${key}" name="${key}" value="${defaultValue}" placeholder="Masukkan ${label}..." ${isRequired ? 'required' : ''} />`;
                     }
-                    if (!isApiKey) paramsToDisplay.push(`${key}=`);
+                    
+                    // Hanya tambahkan ke URL display jika aslinya emang dari URL (bukan file)
+                    if (!isApiKey && urlParam) paramsToDisplay.push(`${key}=`);
                 });
 
-                // Tambah input API Key jika belum ada di URL tapi dibutuhkan
                 if (currentEndpointRequiresApiKey && !hasApiKeyParamInPath) {
                      form.innerHTML += `<label for="apikey">Apikey</label><input type="text" id="apikey" name="apikey" value="" placeholder="Masukkan Apikey..." required />`;
                      hasQueryParams = true; 
                 }
-
                 if (paramsToDisplay.length > 0) displayUrl += "?" + paramsToDisplay.join('&');
             
             } else if (currentEndpointRequiresApiKey) {
@@ -259,7 +252,6 @@ async function initializeMainApiPage() {
                  hasQueryParams = true; 
             }
 
-            // Tombol Submit sesuai Method
             if (hasQueryParams) { 
                 submitBtn.innerHTML = apiMethod === "POST" ? '<i class="fa-solid fa-cloud-arrow-up"></i> Upload / Submit' : '<i class="fa-solid fa-paper-plane"></i> Submit'; 
                 submitBtn.style.display = "flex"; 
@@ -268,14 +260,12 @@ async function initializeMainApiPage() {
                 submitBtn.style.display = "flex"; 
             }
             
-            // Tampilkan URL Dasar (Tanpa isi file karena file tidak masuk URL)
             copyTextEl.innerText = window.location.origin + displayUrl;
             copySection.classList.add("active");
         }
         modal.classList.add("active");
     };
 
-    // --- FUNGSI REQUEST UTAMA (SUPPORT GET & POST) ---
     async function fetchAPI(url, options = {}) {
         const fullURL = url.startsWith('/') ? window.location.origin + url : url;
         const respEl = document.getElementById("apiResponseContent");
@@ -288,7 +278,6 @@ async function initializeMainApiPage() {
         loadEl.style.display = "block"; respEl.classList.add("d-none"); respEl.className = 'd-none'; copyRespBtn.classList.add("d-none"); retryBtn.classList.add('d-none'); respEl.innerHTML = "";
         
         try {
-            // Gunakan options (untuk POST body) jika ada
             const response = await fetch(fullURL, options);
             
             loadEl.style.display = "none"; let hasContent = false; const contentType = response.headers.get("content-type");
@@ -308,21 +297,16 @@ async function initializeMainApiPage() {
         }
     }
 
-    // --- LOGIKA SUBMIT FORM (GET vs POST) ---
     const submitParamBtn = document.getElementById("submitParamBtn"); if (submitParamBtn) submitParamBtn.addEventListener("click", submitParams);
     
     function submitParams() { 
         const form = document.getElementById("paramForm"); 
         if(!form) return; 
         
-        // Validasi API Key
         const akInp = form.querySelector('input[name="apikey"]'); 
         if (currentEndpointRequiresApiKey && akInp && !akInp.value.trim()) { showNotification("API Key required!", 'error'); akInp.focus(); return; } 
-        
-        // Validasi Form Standard
         if (form.innerHTML && !form.checkValidity()) { const inv = form.querySelector(':invalid'); if (inv) inv.focus(); return; } 
         
-        // UI Updates
         form.style.display = "none"; 
         const sBtn = document.getElementById("submitParamBtn"); if(sBtn) sBtn.style.display = "none"; 
         const rEl = document.getElementById("apiResponseContent"); if(rEl) {rEl.innerHTML = ""; rEl.classList.add("d-none");} 
@@ -332,31 +316,23 @@ async function initializeMainApiPage() {
 
         const basePath = currentEndpointPath.split("?")[0];
         
-        // [LOGIKA POST / UPLOAD]
         if (currentEndpointMethod === "POST") {
-            // Buat FormData (Otomatis mengambil text dan file dari form)
             const formData = new FormData(form);
-            
-            // Khusus untuk API Key: Jika ada di form tapi endpoint butuh di URL query (umumnya key jarang di body form-data kalau di API publik)
-            // Kita cek, jika apiKey ada, tetap tempel di URL biar aman.
             let urlWithKey = basePath;
             if (akInp && akInp.value) {
                 urlWithKey += `?apikey=${encodeURIComponent(akInp.value)}`;
-                formData.delete('apikey'); // Hapus dari body agar tidak duplikat (opsional)
+                formData.delete('apikey'); 
             }
-
-            lastFetchedUrl = urlWithKey; // Simpan untuk retry (catatan: retry POST agak tricky, ini basic)
+            lastFetchedUrl = urlWithKey; 
             fetchAPI(urlWithKey, {
                 method: "POST",
                 body: formData
             });
 
         } else {
-            // [LOGIKA GET BIASA]
             let finalURL; 
             if (form.innerHTML) { 
                 const inputs = form.querySelectorAll("input, select"); 
-                // Filter input yang punya nilai, tapi JANGAN ambil input type file (karena file tak bisa via GET url)
                 const query = Array.from(inputs)
                     .filter(i => (i.value.trim() || i.required) && i.type !== 'file')
                     .map(i => `${encodeURIComponent(i.name)}=${encodeURIComponent(i.value)}`)
@@ -370,7 +346,6 @@ async function initializeMainApiPage() {
         }
     }
 
-    // --- Sisa Kode Sama (Report, Sidebar, dll) ---
     async function fetchAndDisplayBlacklistInfo() { const respEl=document.getElementById("apiResponseContent"),loadEl=document.getElementById("apiResponseLoading"),copyRespBtn=document.getElementById("copyResponseBtn"),retryBtn=document.getElementById("retryRequestBtn"),modal=document.getElementById("apiResponseModal");if(!modal||!respEl||!loadEl||!copyRespBtn||!retryBtn)return;loadEl.style.display="block";respEl.classList.add("d-none");respEl.innerHTML='';respEl.className='';respEl.classList.add('d-none','blacklist-info');try{const blacklistResponse=await fetch('/api/blacklist-info');if(!blacklistResponse.ok)throw new Error(`Gagal memuat blacklist: ${blacklistResponse.statusText}`);const blacklistResult=await blacklistResponse.json();if(!blacklistResult.status||!Array.isArray(blacklistResult.data))throw new Error("Format data blacklist tidak valid.");let currentUserIp='Gagal mendapatkan IP Anda.';try{const ipResponse=await fetch('/api/my-ip');if(ipResponse.ok){const ipResult=await ipResponse.json();if(ipResult.status&&ipResult.ip)currentUserIp=ipResult.ip}}catch(ipError){console.warn("Gagal mengambil IP pengguna:",ipError)}let outputHtml=`<span class="user-ip-label">IP Anda Saat Ini:</span> <span class="user-ip-value">${currentUserIp}</span>\n<hr>\n`;outputHtml+=`<span class="list-title">Daftar IP Diblokir (${blacklistResult.data.length}):</span>\n\n`;if(blacklistResult.data.length>0){outputHtml+=blacklistResult.data.map(ip=>String(ip).replace(/</g,"&lt;").replace(/>/g,"&gt;")).join('\n')}else{outputHtml+='<span class="empty-list">(Tidak ada IP yang diblokir saat ini)</span>'}respEl.innerHTML=outputHtml;respEl.classList.remove("d-none");copyRespBtn.classList.remove("d-none");copyRespBtn.innerHTML='<i class="far fa-copy"></i> Copy List';retryBtn.classList.remove('d-none')}catch(err){console.error("Error fetchAndDisplayBlacklistInfo:",err);respEl.innerHTML=`Gagal memuat informasi:\n${err.message}`;respEl.classList.remove("d-none");respEl.classList.add('error-text');copyRespBtn.classList.remove("d-none");copyRespBtn.innerHTML='<i class="far fa-copy"></i> Copy Error';retryBtn.classList.remove('d-none');showNotification("Gagal memuat info blacklist.","error")}finally{loadEl.style.display="none"}}
 
     const mainApiPageEl = document.getElementById('main-api-page'); if (mainApiPageEl) { mainApiPageEl.addEventListener("click", (e) => { const playBtn = e.target.closest(".play-button:not(.btn-secondary):not(#continueBtn):not(#retryRequestBtn):not(#docs-page-button)"); if (playBtn && playBtn.closest('.api-card')) openApiModal(playBtn); const copyUrlBtn = e.target.closest(".copy-section .copy-button"); if (copyUrlBtn) { const txt = document.getElementById("copyEndpointText")?.innerText; if(txt) copyToClipboard(txt, copyUrlBtn, "URL Copied!", true); } const copyRespBtnEl = e.target.closest("#copyResponseBtn"); if (copyRespBtnEl) { const respEl = document.getElementById("apiResponseContent"); if (!respEl) return; let txt = ""; let fb = "Copied!"; const img = respEl.querySelector('img'); if (img) { txt = img.src; fb = "URL Copied!"; } else { txt = respEl.textContent || respEl.innerText; try { txt = JSON.stringify(JSON.parse(txt), null, 2); } catch(err){} } if (txt) copyToClipboard(txt, copyRespBtnEl, fb, false); else showNotification("No response.", "warning"); } if (e.target.classList.contains("tab")) { document.querySelectorAll(".tab").forEach(t => t.classList.remove("active")); e.target.classList.add("active"); renderAPIs(e.target.dataset.tab); } const retryBtn = e.target.closest("#retryRequestBtn"); if (retryBtn) { if (retryBtn.getAttribute('data-action') === 'fetchBlacklist') { fetchAndDisplayBlacklistInfo(); } else { const formEl = document.getElementById("paramForm"); const submitBtnEl = document.getElementById("submitParamBtn"); const respEl = document.getElementById("apiResponseContent"); const copyRespBtnEl = document.getElementById("copyResponseBtn"); const loadEl = document.getElementById("apiResponseLoading"); if(respEl) { respEl.innerHTML = ""; respEl.classList.add("d-none"); respEl.className='d-none';} if(copyRespBtnEl) copyRespBtnEl.classList.add("d-none"); if(loadEl) loadEl.style.display = "none"; retryBtn.classList.add('d-none'); if(formEl) formEl.style.display = "block"; if(submitBtnEl) submitBtnEl.style.display = "flex"; } } }); }
