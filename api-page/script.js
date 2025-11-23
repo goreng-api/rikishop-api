@@ -213,10 +213,19 @@ async function initializeMainApiPage() {
                     const key = keyRaw.trim();
                     const lowerKey = key.toLowerCase();
                     
-                    // [PERBAIKAN]: Logic pengambilan default value yang lebih kuat
-                    const urlParam = queryParams.find(p => p.startsWith(key + '='));
-                    // Gunakan substring agar jika ada "=" di dalam value (misal URL), tidak terpotong
-                    const defaultValue = urlParam ? urlParam.substring(urlParam.indexOf('=') + 1) : "";
+                    // [PERBAIKAN UTAMA]: Logic Pengambilan Default Value
+                    // Kita cari parameter di URL yang diawali dengan 'key='
+                    // Lalu kita ambil substring setelah '=' agar URL panjang tidak terpotong
+                    const paramString = queryParams.find(p => p.startsWith(key + '='));
+                    let defaultValue = "";
+                    if (paramString) {
+                         // Ambil semua string setelah tanda "=" pertama
+                         defaultValue = paramString.substring(key.length + 1);
+                         try { 
+                             // Decode agar tampilan di input box rapi (misal: %20 jadi spasi)
+                             defaultValue = decodeURIComponent(defaultValue); 
+                         } catch(e){}
+                    }
                     
                     const label = key.charAt(0).toUpperCase() + key.slice(1);
                     const isApiKey = lowerKey === 'apikey';
@@ -232,11 +241,18 @@ async function initializeMainApiPage() {
                         form.innerHTML += `<label for="${key}">${label} (Pilih Opsi)</label><select id="${key}" name="${key}" style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--light); margin-bottom: 1rem; font-size: 0.95rem; font-family: inherit;">${optionsHtml}</select>`;
                     } 
                     else {
-                        form.innerHTML += `<label for="${key}">${label}${isRequired ? ' (Wajib)' : ''}</label><input type="text" id="${key}" name="${key}" value="${defaultValue}" placeholder="Masukkan ${label}..." ${isRequired ? 'required' : ''} />`;
+                        // Masukkan defaultValue ke atribut value=""
+                        // Kita ganti tanda kutip " menjadi &quot; biar HTML tidak error
+                        const safeValue = defaultValue.replace(/"/g, "&quot;");
+                        form.innerHTML += `<label for="${key}">${label}${isRequired ? ' (Wajib)' : ''}</label><input type="text" id="${key}" name="${key}" value="${safeValue}" placeholder="Masukkan ${label}..." ${isRequired ? 'required' : ''} />`;
                     }
                     
-                    // [PERBAIKAN]: Tampilkan value default di URL display juga
-                    if (!isApiKey && urlParam) paramsToDisplay.push(`${key}=${defaultValue}`);
+                    // Saat menampilkan di kotak URL atas (Copy URL), kita encode kembali
+                    if (!isApiKey && defaultValue) {
+                        paramsToDisplay.push(`${key}=${encodeURIComponent(defaultValue)}`);
+                    } else if (!isApiKey) {
+                        paramsToDisplay.push(`${key}=`);
+                    }
                 });
 
                 if (currentEndpointRequiresApiKey && !hasApiKeyParamInPath) {
