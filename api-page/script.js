@@ -139,13 +139,14 @@ async function initializeMainApiPage() {
         renderAPIs("all"); 
     } else if (apiList) { apiList.innerHTML = "<p style='color: var(--gray); text-align: center; grid-column: 1 / -1;'>No endpoints found.</p>"; }
 
-    // 5. Event Listener & Modal Logic
+    // 5. Event Listener & Modal Logic (MODIFIKASI DI SINI: Menyisipkan File Support)
     const openApiModal = (playBtn) => {
         const endpointPath = playBtn.dataset.endpoint;
         const apiName = playBtn.dataset.apiname;
         let apiDesc = playBtn.dataset.apidesc || '';
-        const apiMethod = playBtn.dataset.method || "GET"; 
+        const apiMethod = playBtn.dataset.method || "GET"; // Ambil method
         
+        // --- PARSE CONFIG DARI DESKRIPSI (Untuk Select & File) ---
         const selectConfigs = {}; 
         const fileConfigs = {}; 
         
@@ -182,7 +183,7 @@ async function initializeMainApiPage() {
         lastFetchedUrl = "";
         
         currentEndpointPath = endpointPath;
-        currentEndpointMethod = apiMethod;
+        currentEndpointMethod = apiMethod; // Simpan Method Global
         currentEndpointRequiresApiKey = endpointPath.includes("apikey=");
         
         modalTitle.innerText = apiName || "API Endpoint";
@@ -196,63 +197,54 @@ async function initializeMainApiPage() {
             const basePath = pathParts[0];
             let displayUrl = basePath;
             const queryParams = pathParts[1] ? pathParts[1].split('&') : [];
-            
+            let hasQueryParams = false;
+            let hasApiKeyParamInPath = false;
+
+            // GABUNGKAN PARAMETER URL & PARAMETER FILE (Agar form muncul)
             const allParamKeys = new Set();
             queryParams.forEach(p => { if(p) allParamKeys.add(p.split('=')[0].trim()); });
             Object.keys(fileConfigs).forEach(k => allParamKeys.add(k));
-            
-            let hasQueryParams = false;
-            let hasApiKeyParamInPath = false;
 
             if (allParamKeys.size > 0 || currentEndpointRequiresApiKey) {
                 hasQueryParams = true;
                 const paramsToDisplay = [];
 
+                // --- INI LOGIKA ASLI KAMU (DENGAN TAMBAHAN IF ELSE UNTUK FILE) ---
                 allParamKeys.forEach(keyRaw => {
-                    if(!keyRaw) return;
-                    const key = keyRaw.trim();
+                    const key = keyRaw;
                     const lowerKey = key.toLowerCase();
                     
-                    // [PERBAIKAN UTAMA]: Logic Pengambilan Default Value
-                    // Kita cari parameter di URL yang diawali dengan 'key='
-                    // Lalu kita ambil substring setelah '=' agar URL panjang tidak terpotong
-                    const paramString = queryParams.find(p => p.startsWith(key + '='));
+                    // Cek nilai default dari URL (Kode Asli Kamu)
                     let defaultValue = "";
-                    if (paramString) {
-                         // Ambil semua string setelah tanda "=" pertama
-                         defaultValue = paramString.substring(key.length + 1);
-                         try { 
-                             // Decode agar tampilan di input box rapi (misal: %20 jadi spasi)
-                             defaultValue = decodeURIComponent(defaultValue); 
-                         } catch(e){}
+                    const urlParam = queryParams.find(p => p.startsWith(key + '='));
+                    if (urlParam) {
+                        const parts = urlParam.split('=');
+                        if (parts.length > 1) defaultValue = parts.slice(1).join('='); // Gabung lagi kalau ada = lain
                     }
-                    
+
                     const label = key.charAt(0).toUpperCase() + key.slice(1);
                     const isApiKey = lowerKey === 'apikey';
                     if (isApiKey) hasApiKeyParamInPath = true;
                     const isRequired = !isApiKey;
 
+                    // CABANG BARU: Jika ini adalah File Input
                     if (fileConfigs[lowerKey]) {
                         form.innerHTML += `<label for="${key}">${label} (Upload File)</label><input type="file" id="${key}" name="${key}" style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--light); margin-bottom: 1rem;" ${isRequired ? 'required' : ''} />`;
                     }
+                    // CABANG BARU: Jika ini Select
                     else if (selectConfigs[lowerKey]) {
                         const options = selectConfigs[lowerKey];
                         let optionsHtml = options.map(opt => `<option value="${opt}" ${opt === defaultValue ? 'selected' : ''}>${opt.toUpperCase()}</option>`).join('');
                         form.innerHTML += `<label for="${key}">${label} (Pilih Opsi)</label><select id="${key}" name="${key}" style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--light); margin-bottom: 1rem; font-size: 0.95rem; font-family: inherit;">${optionsHtml}</select>`;
                     } 
+                    // CABANG ASLI: Text Input (Dengan Default Value Asli)
                     else {
-                        // Masukkan defaultValue ke atribut value=""
-                        // Kita ganti tanda kutip " menjadi &quot; biar HTML tidak error
-                        const safeValue = defaultValue.replace(/"/g, "&quot;");
-                        form.innerHTML += `<label for="${key}">${label}${isRequired ? ' (Wajib)' : ''}</label><input type="text" id="${key}" name="${key}" value="${safeValue}" placeholder="Masukkan ${label}..." ${isRequired ? 'required' : ''} />`;
+                        // Di sini defaultValue (misal: "Halo%20Dunia") langsung dimasukkan ke value=""
+                        // Jadi tampilannya akan tetap "sambil %" seperti kode asli kamu.
+                        form.innerHTML += `<label for="${key}">${label}${isRequired ? ' (Wajib)' : ''}</label><input type="text" id="${key}" name="${key}" value="${defaultValue}" placeholder="Masukkan ${label}..." ${isRequired ? 'required' : ''} />`;
                     }
-                    
-                    // Saat menampilkan di kotak URL atas (Copy URL), kita encode kembali
-                    if (!isApiKey && defaultValue) {
-                        paramsToDisplay.push(`${key}=${encodeURIComponent(defaultValue)}`);
-                    } else if (!isApiKey) {
-                        paramsToDisplay.push(`${key}=`);
-                    }
+
+                    if (!isApiKey && urlParam) paramsToDisplay.push(urlParam); // Push string asli (key=value)
                 });
 
                 if (currentEndpointRequiresApiKey && !hasApiKeyParamInPath) {
@@ -280,6 +272,7 @@ async function initializeMainApiPage() {
         modal.classList.add("active");
     };
 
+    // --- FUNGSI REQUEST UTAMA (SUPPORT GET & POST) ---
     async function fetchAPI(url, options = {}) {
         const fullURL = url.startsWith('/') ? window.location.origin + url : url;
         const respEl = document.getElementById("apiResponseContent");
@@ -292,6 +285,7 @@ async function initializeMainApiPage() {
         loadEl.style.display = "block"; respEl.classList.add("d-none"); respEl.className = 'd-none'; copyRespBtn.classList.add("d-none"); retryBtn.classList.add('d-none'); respEl.innerHTML = "";
         
         try {
+            // Gunakan options (untuk POST body) jika ada
             const response = await fetch(fullURL, options);
             
             loadEl.style.display = "none"; let hasContent = false; const contentType = response.headers.get("content-type");
@@ -321,6 +315,7 @@ async function initializeMainApiPage() {
         if (currentEndpointRequiresApiKey && akInp && !akInp.value.trim()) { showNotification("API Key required!", 'error'); akInp.focus(); return; } 
         if (form.innerHTML && !form.checkValidity()) { const inv = form.querySelector(':invalid'); if (inv) inv.focus(); return; } 
         
+        // UI Updates
         form.style.display = "none"; 
         const sBtn = document.getElementById("submitParamBtn"); if(sBtn) sBtn.style.display = "none"; 
         const rEl = document.getElementById("apiResponseContent"); if(rEl) {rEl.innerHTML = ""; rEl.classList.add("d-none");} 
@@ -330,6 +325,7 @@ async function initializeMainApiPage() {
 
         const basePath = currentEndpointPath.split("?")[0];
         
+        // [LOGIKA BARU]: Cek Method
         if (currentEndpointMethod === "POST") {
             const formData = new FormData(form);
             let urlWithKey = basePath;
@@ -344,9 +340,11 @@ async function initializeMainApiPage() {
             });
 
         } else {
+            // [LOGIKA ASLI KAMU]: GET Request Biasa
             let finalURL; 
             if (form.innerHTML) { 
                 const inputs = form.querySelectorAll("input, select"); 
+                // Filter: Abaikan input type='file' dari URL Query GET
                 const query = Array.from(inputs)
                     .filter(i => (i.value.trim() || i.required) && i.type !== 'file')
                     .map(i => `${encodeURIComponent(i.name)}=${encodeURIComponent(i.value)}`)
