@@ -197,7 +197,6 @@ async function initializeMainApiPage() {
             let displayUrl = basePath;
             const queryParams = pathParts[1] ? pathParts[1].split('&') : [];
             
-            // [LOGIKA FIX: GABUNGKAN PARAM URL & PARAM FILE]
             const allParamKeys = new Set();
             queryParams.forEach(p => { if(p) allParamKeys.add(p.split('=')[0].trim()); });
             Object.keys(fileConfigs).forEach(k => allParamKeys.add(k));
@@ -210,21 +209,20 @@ async function initializeMainApiPage() {
                 const paramsToDisplay = [];
 
                 allParamKeys.forEach(keyRaw => {
-                    // Abaikan jika key kosong
                     if(!keyRaw) return;
                     const key = keyRaw.trim();
                     const lowerKey = key.toLowerCase();
                     
-                    // Cari value default dari URL jika ada
+                    // [PERBAIKAN]: Logic pengambilan default value yang lebih kuat
                     const urlParam = queryParams.find(p => p.startsWith(key + '='));
-                    const defaultValue = urlParam ? urlParam.split('=')[1] : "";
+                    // Gunakan substring agar jika ada "=" di dalam value (misal URL), tidak terpotong
+                    const defaultValue = urlParam ? urlParam.substring(urlParam.indexOf('=') + 1) : "";
                     
                     const label = key.charAt(0).toUpperCase() + key.slice(1);
                     const isApiKey = lowerKey === 'apikey';
                     if (isApiKey) hasApiKeyParamInPath = true;
                     const isRequired = !isApiKey;
 
-                    // GENERATOR INPUT (PRIORITAS FILE -> SELECT -> TEXT)
                     if (fileConfigs[lowerKey]) {
                         form.innerHTML += `<label for="${key}">${label} (Upload File)</label><input type="file" id="${key}" name="${key}" style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--light); margin-bottom: 1rem;" ${isRequired ? 'required' : ''} />`;
                     }
@@ -237,8 +235,8 @@ async function initializeMainApiPage() {
                         form.innerHTML += `<label for="${key}">${label}${isRequired ? ' (Wajib)' : ''}</label><input type="text" id="${key}" name="${key}" value="${defaultValue}" placeholder="Masukkan ${label}..." ${isRequired ? 'required' : ''} />`;
                     }
                     
-                    // Hanya tambahkan ke URL display jika aslinya emang dari URL (bukan file)
-                    if (!isApiKey && urlParam) paramsToDisplay.push(`${key}=`);
+                    // [PERBAIKAN]: Tampilkan value default di URL display juga
+                    if (!isApiKey && urlParam) paramsToDisplay.push(`${key}=${defaultValue}`);
                 });
 
                 if (currentEndpointRequiresApiKey && !hasApiKeyParamInPath) {
