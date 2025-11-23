@@ -1,11 +1,12 @@
 const fs = require('fs');
 const axios = require('axios');
 const FormData = require('form-data');
-const formidable = require('formidable');
+// PERBAIKAN 1: Cara panggil library Formidable v3 yang benar
+const { IncomingForm } = require('formidable');
 
 module.exports = function(app) {
 
-  // Fungsi Helper: Upload ke Catbox
+  // Fungsi Helper: Upload ke Catbox (Penyimpanan Eksternal)
   async function uploadToCatbox(filePath) {
     const form = new FormData();
     form.append('reqtype', 'fileupload');
@@ -17,7 +18,7 @@ module.exports = function(app) {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'
       }
     });
-    return response.data; // Mengembalikan URL string
+    return response.data; 
   }
 
   /**
@@ -33,12 +34,11 @@ module.exports = function(app) {
 
   /**
    * [POST /tools/tourl]
-   * Upload gambar -> Simpan ke /tmp -> Upload ke Catbox -> Hapus tmp -> Return URL
    */
   app.post('/tools/tourl', (req, res) => {
-    const form = formidable({
-      // Simpan di folder temporary sistem (Vercel mengizinkan ini)
-      uploadDir: '/tmp', 
+    // PERBAIKAN 2: Gunakan 'new IncomingForm' (Wajib untuk Formidable v3)
+    const form = new IncomingForm({
+      uploadDir: '/tmp', // Wajib /tmp untuk Vercel
       keepExtensions: true,
       maxFileSize: 10 * 1024 * 1024, // 10MB
     });
@@ -49,33 +49,39 @@ module.exports = function(app) {
         return res.status(500).json({ status: false, message: "Gagal memproses file.", error: err.message });
       }
 
-      // Ambil file dari key 'image' atau 'file'
-      const file = files.image?.[0] || files.file?.[0];
+      // Formidable v3 terkadang menaruh file dalam array, kita ambil yang pertama
+      // Cek key 'image' atau 'file'
+      let fileData = files.image || files.file;
+      
+      // Pastikan kita ambil object filenya (karena v3 mengembalikan array)
+      if (Array.isArray(fileData)) {
+          fileData = fileData[0];
+      }
 
-      if (!file) {
-        return res.status(400).json({ status: false, message: "File tidak ditemukan. Gunakan key 'image' atau 'file'." });
+      if (!fileData) {
+        return res.status(400).json({ status: false, message: "File tidak ditemukan. Gunakan key 'image' atau 'file' pada form-data." });
       }
 
       try {
         // Upload ke Catbox
-        const url = await uploadToCatbox(file.filepath);
+        const url = await uploadToCatbox(fileData.filepath);
         
-        // Bersihkan file temporary agar storage Vercel tidak penuh
-        fs.unlink(file.filepath, (e) => { if(e) console.error("Gagal hapus temp:", e); });
+        // Bersihkan file temporary di Vercel
+        fs.unlink(fileData.filepath, (e) => { if(e) console.error("Gagal hapus temp:", e); });
 
         // Cek apakah response valid URL
         if (!url || !url.startsWith('http')) {
-           throw new Error("Gagal mendapatkan URL dari server upload.");
+           throw new Error("Gagal mendapatkan URL dari server upload (Catbox).");
         }
 
         res.json({
           status: true,
           creator: "Rikishopreal",
           result: {
-            original_name: file.originalFilename,
-            url: url.trim(), // URL Publik
-            size: file.size,
-            mimetype: file.mimetype
+            original_name: fileData.originalFilename,
+            url: url.trim(), // URL Publik dari Catbox
+            size: fileData.size,
+            mimetype: fileData.mimetype
           }
         });
 
