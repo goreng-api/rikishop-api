@@ -447,6 +447,12 @@
     }
   ],
   "tools": [
+      {
+      "name": "To URL (Local Host)",
+      "desc": "Upload gambar menjadi Link (Domain Sendiri). Gunakan Method POST, key: 'image'.",
+      "status": "Active",
+      "path": "/tools/tourl"
+    },
     {
       "name": "Text-to-speech",
       "desc": "Tts anime character",
