@@ -447,11 +447,12 @@
     }
   ],
   "tools": [
-      {
-      "name": "To URL (Local Host)",
-      "desc": "Upload gambar menjadi Link (Domain Sendiri). Gunakan Method POST, key: 'image'.",
+    {
+      "name": "To URL (Upload)",
+      "desc": "Upload gambar jadi Link. [input:file|image]",
       "status": "Active",
-      "path": "/tools/tourl?url="
+      "method": "POST",
+      "path": "/tools/tourl"
     },
     {
       "name": "Text-to-speech",
