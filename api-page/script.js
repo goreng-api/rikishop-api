@@ -139,14 +139,13 @@ async function initializeMainApiPage() {
         renderAPIs("all"); 
     } else if (apiList) { apiList.innerHTML = "<p style='color: var(--gray); text-align: center; grid-column: 1 / -1;'>No endpoints found.</p>"; }
 
-    // 5. Event Listener & Modal Logic (MODIFIKASI DI SINI: Menyisipkan File Support)
+    // 5. Event Listener & Modal Logic
     const openApiModal = (playBtn) => {
         const endpointPath = playBtn.dataset.endpoint;
         const apiName = playBtn.dataset.apiname;
         let apiDesc = playBtn.dataset.apidesc || '';
-        const apiMethod = playBtn.dataset.method || "GET"; // Ambil method
+        const apiMethod = playBtn.dataset.method || "GET"; 
         
-        // --- PARSE CONFIG DARI DESKRIPSI (Untuk Select & File) ---
         const selectConfigs = {}; 
         const fileConfigs = {}; 
         
@@ -179,11 +178,14 @@ async function initializeMainApiPage() {
         const copyRespBtn = document.getElementById("copyResponseBtn");
         if (!modal) return;
 
-        respEl.innerHTML = ""; respEl.classList.add("d-none"); loadEl.style.display = "none"; form.innerHTML = ""; form.style.display = "block"; submitBtn.style.display = "none"; copyRespBtn.classList.add("d-none"); retryBtn.classList.add('d-none'); retryBtn.removeAttribute('data-action'); copySection.classList.remove("active");
-        lastFetchedUrl = "";
+        respEl.innerHTML = ""; respEl.classList.add("d-none"); loadEl.style.display = "none"; form.innerHTML = ""; form.style.display = "block"; submitBtn.style.display = "none"; copyRespBtn.classList.add("d-none"); retryBtn.classList.add('d-none'); retryBtn.removeAttribute('data-action'); 
         
+        // [FIX]: Sembunyikan kotak URL saat pertama buka modal
+        copySection.classList.remove("active"); 
+        
+        lastFetchedUrl = "";
         currentEndpointPath = endpointPath;
-        currentEndpointMethod = apiMethod; // Simpan Method Global
+        currentEndpointMethod = apiMethod;
         currentEndpointRequiresApiKey = endpointPath.includes("apikey=");
         
         modalTitle.innerText = apiName || "API Endpoint";
@@ -195,63 +197,54 @@ async function initializeMainApiPage() {
         else {
             const pathParts = endpointPath.split('?');
             const basePath = pathParts[0];
-            let displayUrl = basePath;
             const queryParams = pathParts[1] ? pathParts[1].split('&') : [];
-            let hasQueryParams = false;
-            let hasApiKeyParamInPath = false;
-
-            // GABUNGKAN PARAMETER URL & PARAMETER FILE (Agar form muncul)
+            
             const allParamKeys = new Set();
             queryParams.forEach(p => { if(p) allParamKeys.add(p.split('=')[0].trim()); });
             Object.keys(fileConfigs).forEach(k => allParamKeys.add(k));
+            
+            let hasQueryParams = false;
+            let hasApiKeyParamInPath = false;
 
             if (allParamKeys.size > 0 || currentEndpointRequiresApiKey) {
                 hasQueryParams = true;
-                const paramsToDisplay = [];
 
-                // --- INI LOGIKA ASLI KAMU (DENGAN TAMBAHAN IF ELSE UNTUK FILE) ---
                 allParamKeys.forEach(keyRaw => {
-                    const key = keyRaw;
+                    if(!keyRaw) return;
+                    const key = keyRaw.trim();
                     const lowerKey = key.toLowerCase();
                     
-                    // Cek nilai default dari URL (Kode Asli Kamu)
-                    let defaultValue = "";
+                    // Logic Value Default
                     const urlParam = queryParams.find(p => p.startsWith(key + '='));
+                    let defaultValue = "";
                     if (urlParam) {
-                        const parts = urlParam.split('=');
-                        if (parts.length > 1) defaultValue = parts.slice(1).join('='); // Gabung lagi kalau ada = lain
+                         defaultValue = urlParam.substring(key.length + 1);
+                         try { defaultValue = decodeURIComponent(defaultValue); } catch(e){}
                     }
-
+                    
                     const label = key.charAt(0).toUpperCase() + key.slice(1);
                     const isApiKey = lowerKey === 'apikey';
                     if (isApiKey) hasApiKeyParamInPath = true;
                     const isRequired = !isApiKey;
 
-                    // CABANG BARU: Jika ini adalah File Input
                     if (fileConfigs[lowerKey]) {
                         form.innerHTML += `<label for="${key}">${label} (Upload File)</label><input type="file" id="${key}" name="${key}" style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--light); margin-bottom: 1rem;" ${isRequired ? 'required' : ''} />`;
                     }
-                    // CABANG BARU: Jika ini Select
                     else if (selectConfigs[lowerKey]) {
                         const options = selectConfigs[lowerKey];
                         let optionsHtml = options.map(opt => `<option value="${opt}" ${opt === defaultValue ? 'selected' : ''}>${opt.toUpperCase()}</option>`).join('');
                         form.innerHTML += `<label for="${key}">${label} (Pilih Opsi)</label><select id="${key}" name="${key}" style="width: 100%; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--light); margin-bottom: 1rem; font-size: 0.95rem; font-family: inherit;">${optionsHtml}</select>`;
                     } 
-                    // CABANG ASLI: Text Input (Dengan Default Value Asli)
                     else {
-                        // Di sini defaultValue (misal: "Halo%20Dunia") langsung dimasukkan ke value=""
-                        // Jadi tampilannya akan tetap "sambil %" seperti kode asli kamu.
-                        form.innerHTML += `<label for="${key}">${label}${isRequired ? ' (Wajib)' : ''}</label><input type="text" id="${key}" name="${key}" value="${defaultValue}" placeholder="Masukkan ${label}..." ${isRequired ? 'required' : ''} />`;
+                        const safeValue = defaultValue.replace(/"/g, "&quot;");
+                        form.innerHTML += `<label for="${key}">${label}${isRequired ? ' (Wajib)' : ''}</label><input type="text" id="${key}" name="${key}" value="${safeValue}" placeholder="Masukkan ${label}..." ${isRequired ? 'required' : ''} />`;
                     }
-
-                    if (!isApiKey && urlParam) paramsToDisplay.push(urlParam); // Push string asli (key=value)
                 });
 
                 if (currentEndpointRequiresApiKey && !hasApiKeyParamInPath) {
                      form.innerHTML += `<label for="apikey">Apikey</label><input type="text" id="apikey" name="apikey" value="" placeholder="Masukkan Apikey..." required />`;
                      hasQueryParams = true; 
                 }
-                if (paramsToDisplay.length > 0) displayUrl += "?" + paramsToDisplay.join('&');
             
             } else if (currentEndpointRequiresApiKey) {
                  form.innerHTML += `<label for="apikey">Apikey</label><input type="text" id="apikey" name="apikey" value="" placeholder="Masukkan Apikey..." required />`;
@@ -265,14 +258,10 @@ async function initializeMainApiPage() {
                 submitBtn.innerHTML = '<i class="fa-solid fa-play"></i> Try it'; 
                 submitBtn.style.display = "flex"; 
             }
-            
-            copyTextEl.innerText = window.location.origin + displayUrl;
-            copySection.classList.add("active");
         }
         modal.classList.add("active");
     };
 
-    // --- FUNGSI REQUEST UTAMA (SUPPORT GET & POST) ---
     async function fetchAPI(url, options = {}) {
         const fullURL = url.startsWith('/') ? window.location.origin + url : url;
         const respEl = document.getElementById("apiResponseContent");
@@ -285,7 +274,6 @@ async function initializeMainApiPage() {
         loadEl.style.display = "block"; respEl.classList.add("d-none"); respEl.className = 'd-none'; copyRespBtn.classList.add("d-none"); retryBtn.classList.add('d-none'); respEl.innerHTML = "";
         
         try {
-            // Gunakan options (untuk POST body) jika ada
             const response = await fetch(fullURL, options);
             
             loadEl.style.display = "none"; let hasContent = false; const contentType = response.headers.get("content-type");
@@ -315,7 +303,6 @@ async function initializeMainApiPage() {
         if (currentEndpointRequiresApiKey && akInp && !akInp.value.trim()) { showNotification("API Key required!", 'error'); akInp.focus(); return; } 
         if (form.innerHTML && !form.checkValidity()) { const inv = form.querySelector(':invalid'); if (inv) inv.focus(); return; } 
         
-        // UI Updates
         form.style.display = "none"; 
         const sBtn = document.getElementById("submitParamBtn"); if(sBtn) sBtn.style.display = "none"; 
         const rEl = document.getElementById("apiResponseContent"); if(rEl) {rEl.innerHTML = ""; rEl.classList.add("d-none");} 
@@ -325,7 +312,10 @@ async function initializeMainApiPage() {
 
         const basePath = currentEndpointPath.split("?")[0];
         
-        // [LOGIKA BARU]: Cek Method
+        // [FIX]: Tampilkan Kotak Copy URL HANYA saat submit ditekan
+        const copySection = document.querySelector(".copy-section");
+        const copyTextEl = document.getElementById("copyEndpointText");
+        
         if (currentEndpointMethod === "POST") {
             const formData = new FormData(form);
             let urlWithKey = basePath;
@@ -333,6 +323,11 @@ async function initializeMainApiPage() {
                 urlWithKey += `?apikey=${encodeURIComponent(akInp.value)}`;
                 formData.delete('apikey'); 
             }
+            
+            // Tampilkan URL di kotak atas
+            if(copyTextEl) copyTextEl.innerText = window.location.origin + urlWithKey;
+            if(copySection) copySection.classList.add("active");
+
             lastFetchedUrl = urlWithKey; 
             fetchAPI(urlWithKey, {
                 method: "POST",
@@ -340,11 +335,9 @@ async function initializeMainApiPage() {
             });
 
         } else {
-            // [LOGIKA ASLI KAMU]: GET Request Biasa
             let finalURL; 
             if (form.innerHTML) { 
                 const inputs = form.querySelectorAll("input, select"); 
-                // Filter: Abaikan input type='file' dari URL Query GET
                 const query = Array.from(inputs)
                     .filter(i => (i.value.trim() || i.required) && i.type !== 'file')
                     .map(i => `${encodeURIComponent(i.name)}=${encodeURIComponent(i.value)}`)
@@ -353,6 +346,11 @@ async function initializeMainApiPage() {
             } else { 
                 finalURL = basePath; 
             } 
+            
+            // Tampilkan URL di kotak atas
+            if(copyTextEl) copyTextEl.innerText = window.location.origin + finalURL;
+            if(copySection) copySection.classList.add("active");
+
             lastFetchedUrl = finalURL; 
             fetchAPI(finalURL); 
         }
